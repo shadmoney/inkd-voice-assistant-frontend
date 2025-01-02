@@ -23,6 +23,7 @@ export default function Page() {
     ConnectionDetails | undefined
   >(undefined);
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
+  const [showTapToSpeak, setShowTapToSpeak] = useState(true);
 
   const onConnectButtonClicked = useCallback(async () => {
     const url = new URL(
@@ -33,6 +34,7 @@ export default function Page() {
     const response = await fetch(url.toString());
     const connectionDetailsData = await response.json();
     updateConnectionDetails(connectionDetailsData);
+    setShowTapToSpeak(false);
   }, []);
 
   return (
@@ -52,7 +54,7 @@ export default function Page() {
           className="w-full max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-8 shadow-lg"
         >
           <SimpleVoiceAssistant onStateChange={setAgentState} />
-          <p className="text-text-primary mt-4 mb-8">Tap to Speak</p>
+          {showTapToSpeak}
           <ControlBar
             onConnectButtonClicked={onConnectButtonClicked}
             agentState={agentState}
@@ -109,19 +111,7 @@ function ControlBar(props: {
             className="bg-accent text-white rounded-full p-4 shadow-lg hover:bg-opacity-90 transition-colors"
             onClick={() => props.onConnectButtonClicked()}
           >
-            <svg 
-              className="w-6 h-6" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            Tap to speak
           </motion.button>
         )}
       </AnimatePresence>
