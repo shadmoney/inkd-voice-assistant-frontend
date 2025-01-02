@@ -53,7 +53,7 @@ const recipients: Recipient[] = [
 export default function ContractPage() {
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-[calc(100vh-2rem)]">
+      <div className="flex flex-col min-h-screen">
         {/* Header */}
         <div className="flex justify-between items-center mb-4 lg:mb-6 px-4 lg:px-0">
           <div className="flex items-center space-x-2 text-sm overflow-x-auto whitespace-nowrap">
@@ -70,9 +70,9 @@ export default function ContractPage() {
           </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row flex-1 space-y-4 lg:space-y-0 lg:space-x-6 overflow-hidden px-4 lg:px-0">
+        <div className="flex flex-col lg:flex-row flex-1 space-y-6 lg:space-y-0 lg:space-x-6 px-4 lg:px-0">
           {/* Left Sidebar - Contract Actions */}
-          <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm p-4 lg:p-6 overflow-y-auto">
+          <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm p-6 overflow-y-auto">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Contract Actions</h2>
             <div className="space-y-4">
               {contractActions.map((action, index) => (
@@ -96,14 +96,14 @@ export default function ContractPage() {
           </div>
 
           {/* Main Content - Contract Document */}
-          <div className="flex-1 bg-white rounded-xl shadow-sm p-4 lg:p-6 overflow-y-auto">
-            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4 lg:mb-6">Residential Sales Contract (Virginia)</h1>
+          <div className="flex-1 bg-white rounded-xl shadow-sm p-6 overflow-y-auto">
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-6">Residential Sales Contract (Virginia)</h1>
             
             <div className="space-y-6 lg:space-y-8">
               {/* Real Property Section */}
               <div className="space-y-4">
                 <h2 className="text-lg font-medium text-gray-900">Real Property</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Legal Description</label>
                     <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" placeholder="Enter legal description" />
@@ -141,7 +141,7 @@ export default function ContractPage() {
           </div>
 
           {/* Right Sidebar - Recipients */}
-          <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm p-4 lg:p-6 overflow-y-auto">
+          <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm p-6 overflow-y-auto">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Recipients</h2>
             <div className="space-y-4">
               {recipients.map((recipient, index) => (
@@ -157,7 +157,7 @@ export default function ContractPage() {
               <h3 className="text-sm font-medium text-gray-900 mb-3">Document Pages</h3>
               <div className="grid grid-cols-2 gap-2">
                 {[1, 2, 3, 4].map((page) => (
-                  <div key={page} className="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div key={page} className="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center shadow-sm">
                     <span className="text-xs text-gray-500">Page {page}</span>
                   </div>
                 ))}
@@ -167,8 +167,8 @@ export default function ContractPage() {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end mt-4 lg:mt-6 px-4 lg:px-0">
-          <button className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 transition-colors w-full sm:w-auto">
+        <div className="flex justify-end mt-6 px-4 lg:px-0">
+          <button className="inline-flex items-center px-6 py-3 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 transition-colors w-full sm:w-auto">
             Review & Send
           </button>
         </div>

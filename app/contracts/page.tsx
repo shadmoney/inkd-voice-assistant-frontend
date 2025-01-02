@@ -39,7 +39,7 @@ const clients: Client[] = [
 export default function ContractsPage() {
   return (
     <DashboardLayout>
-      <div className="px-4 sm:px-0">
+      <div className="px-6 sm:px-0">
         {/* Header with breadcrumb and action button */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-2 text-sm overflow-x-auto whitespace-nowrap">
@@ -65,13 +65,13 @@ export default function ContractsPage() {
       </div>
 
       {/* Contracts Section */}
-      <div className="bg-white rounded-xl shadow-sm mb-6">
-        <div className="p-4 sm:p-6 border-b border-gray-200">
+      <div className="bg-white rounded-xl shadow-sm mb-6 max-w-[100vw]">
+        <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Contracts</h2>
           <p className="text-sm text-gray-500">10 done this month</p>
         </div>
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <div className="inline-block min-w-full align-middle">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 -mx-6">
+          <div className="inline-block min-w-full align-middle px-6">
             <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -140,12 +140,12 @@ export default function ContractsPage() {
       </div>
 
       {/* Clients Section */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="p-4 sm:p-6 border-b border-gray-200">
+      <div className="bg-white rounded-xl shadow-sm max-w-[100vw]">
+        <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Clients</h2>
         </div>
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <div className="inline-block min-w-full align-middle">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 -mx-6">
+          <div className="inline-block min-w-full align-middle px-6">
             <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
