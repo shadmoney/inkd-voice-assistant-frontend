@@ -47,14 +47,14 @@ export default function LoginPage() {
 
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-sm sm:text-base text-gray-600 mt-2">Log in to your account</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Log in to your Inkd account</p>
           </div>
 
           <button
             onClick={login}
             className="w-full flex justify-center py-3 sm:py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-base sm:text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 touch-manipulation"
           >
-            Login with Privy
+            Login
           </button>
 
           <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
