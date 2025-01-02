@@ -66,7 +66,7 @@ export function NoAgentNotification(props: NoAgentNotificationProps) {
               />
             </svg>
           </div>
-          <p className="text-pretty w-max">
+          <p className="text-pretty w-max text-white">
             It&apos;s quiet... too quiet. Is your agent lost? Ensure your agent
             is properly configured and running on your machine.
           </p>
