@@ -11,13 +11,13 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md">
+    <form onSubmit={handleSubmit} className="flex w-full max-w-md mx-auto">
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Enter address..."
-        className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+        className="flex-1 px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-bold text-black placeholder-black"
       />
       <button
         type="submit"

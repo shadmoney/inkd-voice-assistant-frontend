@@ -15,7 +15,7 @@ export default function ClientLayout({
         appearance: {
           theme: 'light',
           accentColor: '#676FFF',
-          logo: 'https://your-logo-url.com/logo.png',
+          logo: '/inkd-logo.svg',
         },
       }}
     >

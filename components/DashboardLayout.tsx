@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { useEffect } from 'react';
 import Sidebar from './Sidebar';
+import Header from './Header';
 
 export default function DashboardLayout({
   children,
@@ -27,6 +28,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen bg-white">
       <Sidebar />
       <div className="flex-1">
+        <Header />
         <div className="p-8">
           {children}
         </div>
