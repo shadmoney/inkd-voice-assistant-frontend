@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 export default function Sidebar() {
@@ -8,7 +9,16 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 min-h-screen bg-white border-r border-gray-200">
-      <nav className="mt-8 px-4">
+      <div className="px-6 py-8">
+        <Image
+          src="/inkd-logo.svg"
+          alt="Inkd Logo"
+          width={120}
+          height={40}
+          priority
+        />
+      </div>
+      <nav className="px-4">
         <ul className="space-y-2">
           <li>
             <Link 

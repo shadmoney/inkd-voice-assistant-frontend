@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <!-- Pink Ink Drop -->
+  <circle cx="30" cy="30" r="10" fill="#FF007F" />
+  <path d="M30 40 Q30 60 20 70 Q30 80 40 70 Q30 60 30 40 Z" fill="#FF007F" />
+  
+  <!-- Inkd Text -->
+  <text x="50" y="50" font-family="Arial, sans-serif" font-size="36" fill="#000000" font-weight="bold" transform="translate(0, 8)">
+    Inkd
+  </text>
+</svg>
