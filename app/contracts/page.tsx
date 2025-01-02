@@ -2,14 +2,7 @@
 
 import DashboardLayout from '../../components/DashboardLayout';
 import Link from 'next/link';
-import { usePrivy } from '@privy-io/react-auth';
 import SearchBar from '../../components/SearchBar';
-
-// Format wallet address to show first 6 and last 4 characters
-const formatAddress = (address: string) => {
-  if (!address) return '';
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-};
 
 // Contract type definition
 interface Contract {
@@ -44,21 +37,8 @@ const clients: Client[] = [
 ];
 
 export default function ContractsPage() {
-  const { user } = usePrivy();
-  const displayName = user?.email?.address || formatAddress(user?.wallet?.address || '');
-
   return (
     <DashboardLayout>
-      {/* User Info Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">Connected Account</h2>
-            <p className="text-gray-600 mt-1">{displayName}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Header with breadcrumb and action button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
         <div className="flex items-center space-x-2 text-sm">
