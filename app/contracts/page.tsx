@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 // Contract type definition
 interface Contract {
+  id: number;
   clientName: string;
   price: string;
   status: 'Underwriting' | 'Canceled' | 'Closed' | 'Signature';
@@ -22,10 +23,10 @@ interface Client {
 
 // Sample data
 const contracts: Contract[] = [
-  { clientName: 'Eleanor & Ethan Bennett', price: '$850,000', status: 'Underwriting', completion: 60 },
-  { clientName: 'Shane Battier', price: '$4,500,000', status: 'Canceled', completion: 10 },
-  { clientName: 'John Smith', price: '$650,000', status: 'Closed', completion: 100 },
-  { clientName: 'Sarah Johnson', price: '$925,000', status: 'Signature', completion: 85 },
+  { id: 1, clientName: 'Eleanor & Ethan Bennett', price: '$850,000', status: 'Underwriting', completion: 60 },
+  { id: 2, clientName: 'Shane Battier', price: '$4,500,000', status: 'Canceled', completion: 10 },
+  { id: 3, clientName: 'John Smith', price: '$650,000', status: 'Closed', completion: 100 },
+  { id: 4, clientName: 'Sarah Johnson', price: '$925,000', status: 'Signature', completion: 85 },
 ];
 
 const clients: Client[] = [
@@ -74,19 +75,24 @@ export default function ContractsPage() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {contracts.map((contract, index) => (
-                <tr key={index}>
+                <tr key={index} className="group hover:bg-gray-50 cursor-pointer">
                   <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      <span className="text-sm text-gray-900">{contract.clientName}</span>
-                    </div>
+                    <Link href={`/contracts/${contract.id}`} className="block w-full">
+                      <div className="flex items-center">
+                        <svg className="w-5 h-5 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="text-sm text-gray-900">{contract.clientName}</span>
+                      </div>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm text-gray-900">{contract.price}</span>
+                    <Link href={`/contracts/${contract.id}`} className="block w-full">
+                      <span className="text-sm text-gray-900">{contract.price}</span>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
+                    <Link href={`/contracts/${contract.id}`} className="block w-full">
                     <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
                       contract.status === 'Closed' ? 'bg-green-100 text-green-800' :
                       contract.status === 'Canceled' ? 'bg-red-100 text-red-800' :
@@ -94,17 +100,20 @@ export default function ContractsPage() {
                     }`}>
                       {contract.status}
                     </span>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
-                        <div
-                          className="bg-pink-600 h-2 rounded-full"
-                          style={{ width: `${contract.completion}%` }}
-                        />
+                    <Link href={`/contracts/${contract.id}`} className="block w-full">
+                      <div className="flex items-center">
+                        <div className="w-full bg-gray-200 rounded-full h-2 mr-2">
+                          <div
+                            className="bg-pink-600 h-2 rounded-full"
+                            style={{ width: `${contract.completion}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-500">{contract.completion}%</span>
                       </div>
-                      <span className="text-sm text-gray-500">{contract.completion}%</span>
-                    </div>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
                     <button className="text-gray-400 hover:text-gray-600">
