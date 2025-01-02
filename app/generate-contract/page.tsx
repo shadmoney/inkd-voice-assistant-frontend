@@ -16,7 +16,7 @@ import type { ConnectionDetails } from "../api/connection-details/route";
 import { NoAgentNotification } from "../../components/NoAgentNotification";
 import { CloseIcon } from "../../components/CloseIcon";
 import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
-import Header from "../../components/Header";
+import DashboardLayout from "../../components/DashboardLayout";
 
 export default function GenerateContract() {
   const [connectionDetails, updateConnectionDetails] = useState<
@@ -38,9 +38,8 @@ export default function GenerateContract() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-1 flex flex-col items-center justify-center p-6">
+    <DashboardLayout>
+      <main className="flex-1 flex flex-col items-center justify-center">
         <LiveKitRoom
           token={connectionDetails?.participantToken}
           serverUrl={connectionDetails?.serverUrl}
@@ -63,7 +62,7 @@ export default function GenerateContract() {
           <NoAgentNotification state={agentState} />
         </LiveKitRoom>
       </main>
-    </div>
+    </DashboardLayout>
   );
 }
 

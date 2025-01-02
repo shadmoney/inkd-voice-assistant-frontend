@@ -1,28 +1,41 @@
 "use client";
 
 import DashboardLayout from '../../components/DashboardLayout';
+import { usePrivy } from '@privy-io/react-auth';
+
+// Format wallet address to show first 6 and last 4 characters
+const formatAddress = (address: string) => {
+  if (!address) return '';
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 // Profile Section Component
-const ProfileSection = () => (
-  <div className="bg-white rounded-lg shadow p-6">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-4">
-        <div className="bg-red-600 text-white font-bold w-12 h-12 rounded-lg flex items-center justify-center">
-          KW
+const ProfileSection = () => {
+  const { user } = usePrivy();
+  const displayName = user?.email?.toString() || formatAddress(user?.wallet?.address || '');
+  const initials = displayName.slice(0, 2).toUpperCase();
+  
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="bg-pink-600 text-white font-bold w-12 h-12 rounded-lg flex items-center justify-center">
+            {initials}
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">{displayName}</h3>
+            <p className="text-gray-600">{user?.email?.toString() || 'Wallet Connected'}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Sean Love</h3>
-          <p className="text-gray-600">seanlove@kw.com</p>
-        </div>
+        <button className="text-gray-400 hover:text-gray-600">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </button>
       </div>
-      <button className="text-gray-400 hover:text-gray-600">
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-        </svg>
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 // Billing Section Component
 const BillingSection = () => (

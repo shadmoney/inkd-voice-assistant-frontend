@@ -2,8 +2,18 @@
 
 import Link from 'next/link';
 import DashboardLayout from '../components/DashboardLayout';
+import { usePrivy } from '@privy-io/react-auth';
+
+// Format wallet address to show first 6 and last 4 characters
+const formatAddress = (address: string) => {
+  if (!address) return '';
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 export default function Dashboard() {
+  const { user } = usePrivy();
+  const displayName = user?.email?.toString() || formatAddress(user?.wallet?.address || '');
+  
   return (
     <DashboardLayout>
       {/* Top Navigation */}
@@ -28,26 +38,29 @@ export default function Dashboard() {
               <span className="ml-2 text-sm text-green-500">+8%</span>
             </div>
           </div>
-          <Link 
-            href="/generate-contract"
-            className="flex items-center px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Generate a Contract
-          </Link>
         </div>
+      </div>
+
+      {/* Generate Contract Button */}
+      <div className="mb-8">
+        <Link 
+          href="/generate-contract"
+          className="inline-flex items-center px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Generate a Contract
+        </Link>
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-3 gap-8 mb-8">
         {/* Welcome Section */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-2xl font-semibold mb-2">Welcome back, Sean Love</h2>
-          <Link href="/generate-contract" className="text-pink-600 hover:text-pink-700">
-            Tap to generate →
-          </Link>
+          <h2 className="text-2xl font-semibold mb-2">
+            Welcome back, <span className="text-pink-600">{displayName}</span>
+          </h2>
         </div>
 
         {/* Contract Acceptance Rate */}

@@ -48,6 +48,19 @@ export default function Sidebar() {
           </li>
           <li>
             <Link 
+              href="/generate-contract"
+              className={`flex items-center px-4 py-2 text-sm rounded-lg ${
+                pathname === '/generate-contract' ? 'text-pink-600 bg-pink-50' : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Generate Contract
+            </Link>
+          </li>
+          <li>
+            <Link 
               href="/account"
               className={`flex items-center px-4 py-2 text-sm rounded-lg ${
                 pathname === '/account' ? 'text-pink-600 bg-pink-50' : 'text-gray-700 hover:bg-gray-100'
