@@ -16,7 +16,7 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Enter address..."
+        placeholder="Enter an address..."
         className="flex-1 px-3 sm:px-4 py-2.5 sm:py-2 text-sm sm:text-base rounded-l-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent font-bold text-black placeholder-black"
       />
       <button
