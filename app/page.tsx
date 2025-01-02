@@ -42,32 +42,38 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6 sm:mb-8">
-        <SearchBar onSearch={(query) => console.log('Searching for:', query)} />
-      </div>
-
-      {/* Generate Contract Button */}
-      <div className="mb-6 sm:mb-8">
+      {/* Search Bar and Generate Contract Button */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-6 sm:mb-8">
         <Link 
           href="/generate-contract"
-          className="inline-flex items-center px-4 sm:px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors w-full sm:w-auto justify-center sm:justify-start"
+          className="inline-flex items-center px-4 sm:px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors w-full sm:w-auto justify-center order-2 sm:order-1"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Generate a Contract
         </Link>
+        <div className="w-full sm:w-1/2 order-1 sm:order-2">
+          <SearchBar onSearch={(query) => console.log('Searching for:', query)} />
+        </div>
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
         {/* Welcome Section */}
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-2">
-            Welcome back, <span className="text-pink-600">{displayName}</span>
-          </h2>
-        </div>
+        <Link href="/generate-contract" className="block">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col items-center justify-center text-center">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-6">
+              Welcome back, <span className="text-pink-600">{displayName}</span>
+            </h2>
+            <div className="flex items-center text-gray-500 mt-auto">
+              <span>Tap to generate</span>
+              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </div>
+          </div>
+        </Link>
 
         {/* Contract Acceptance Rate */}
         <div className="bg-white rounded-lg shadow p-4 sm:p-6 text-center">
