@@ -40,8 +40,8 @@ export default function GenerateContract() {
 
   return (
     <DashboardLayout>
-      <main className="flex-1 flex flex-col items-center">
-        <div className="w-full max-w-2xl mb-8">
+      <main className="flex-1 flex flex-col items-center px-4 sm:px-0">
+        <div className="w-full max-w-[90%] sm:max-w-2xl mb-6 sm:mb-8">
           <SearchBar onSearch={(query) => console.log('Searching for:', query)} />
         </div>
         <LiveKitRoom
@@ -54,7 +54,7 @@ export default function GenerateContract() {
           onDisconnected={() => {
             updateConnectionDetails(undefined);
           }}
-          className="w-full max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-8"
+          className="w-full max-w-[90%] sm:max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-4 sm:p-8"
         >
           <SimpleVoiceAssistant onStateChange={setAgentState} />
           {showTapToSpeak}
@@ -78,7 +78,7 @@ function SimpleVoiceAssistant(props: {
     props.onStateChange(state);
   }, [props, state]);
   return (
-    <div className="h-[300px] max-w-[90vw] mx-auto flex flex-col items-center justify-center">
+    <div className="h-[200px] sm:h-[300px] w-full mx-auto flex flex-col items-center justify-center">
       <BarVisualizer
         state={state}
         barCount={3}
@@ -110,7 +110,7 @@ function ControlBar(props: {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.3 }}
-            className="bg-accent text-white rounded-full p-4 hover:bg-opacity-90 transition-colors"
+            className="bg-accent text-white rounded-full px-6 py-4 text-base sm:text-lg hover:bg-opacity-90 transition-colors touch-manipulation"
             onClick={() => props.onConnectButtonClicked()}
           >
             Tap to speak
@@ -125,9 +125,11 @@ function ControlBar(props: {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="flex space-x-4"
+              className="flex items-center space-x-4"
             >
-              <VoiceAssistantControlBar controls={{ leave: false }} />
+              <div className="touch-manipulation">
+                <VoiceAssistantControlBar controls={{ leave: false }} />
+              </div>
               <DisconnectButton>
                 <CloseIcon />
               </DisconnectButton>

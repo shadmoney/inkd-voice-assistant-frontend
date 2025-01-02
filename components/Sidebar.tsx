@@ -8,8 +8,8 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 min-h-screen bg-white border-r border-gray-200">
-      <div className="px-6 py-8">
+    <aside className="w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto">
+      <div className="px-4 sm:px-6 py-6 sm:py-8">
         <Image
           src="/inkd-logo.svg"
           alt="Inkd Logo"
@@ -18,12 +18,12 @@ export default function Sidebar() {
           priority
         />
       </div>
-      <nav className="px-4">
-        <ul className="space-y-2">
+      <nav className="px-2 sm:px-4">
+        <ul className="space-y-1 sm:space-y-2">
           <li>
             <Link 
               href="/"
-              className={`flex items-center px-4 py-2 text-sm rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 text-sm rounded-lg ${
                 pathname === '/' ? 'text-pink-600 bg-pink-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -36,7 +36,7 @@ export default function Sidebar() {
           <li>
             <Link 
               href="/contracts"
-              className={`flex items-center px-4 py-2 text-sm rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 text-sm rounded-lg ${
                 pathname === '/contracts' ? 'text-pink-600 bg-pink-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -49,7 +49,7 @@ export default function Sidebar() {
           <li>
             <Link 
               href="/generate-contract"
-              className={`flex items-center px-4 py-2 text-sm rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 text-sm rounded-lg ${
                 pathname === '/generate-contract' ? 'text-pink-600 bg-pink-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -62,7 +62,7 @@ export default function Sidebar() {
           <li>
             <Link 
               href="/account"
-              className={`flex items-center px-4 py-2 text-sm rounded-lg ${
+              className={`flex items-center px-3 sm:px-4 py-2 text-sm rounded-lg ${
                 pathname === '/account' ? 'text-pink-600 bg-pink-50' : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
