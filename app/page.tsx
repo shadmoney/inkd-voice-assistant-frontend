@@ -51,7 +51,7 @@ export default function Page() {
           onDisconnected={() => {
             updateConnectionDetails(undefined);
           }}
-          className="w-full max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-8 shadow-lg"
+          className="w-full max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-8"
         >
           <SimpleVoiceAssistant onStateChange={setAgentState} />
           {showTapToSpeak}
@@ -108,7 +108,7 @@ function ControlBar(props: {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.3 }}
-            className="bg-accent text-white rounded-full p-4 shadow-lg hover:bg-opacity-90 transition-colors"
+            className="bg-accent text-white rounded-full p-4 hover:bg-opacity-90 transition-colors"
             onClick={() => props.onConnectButtonClicked()}
           >
             Tap to speak

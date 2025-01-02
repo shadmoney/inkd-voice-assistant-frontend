@@ -14,9 +14,8 @@
 }
 
 .agent-visualizer > .lk-audio-bar-container {
-  background-color: #f2f2f2;
+  background-color: transparent;
   border-radius: 12px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .agent-visualizer[data-lk-agent-state="speaking"] .lk-audio-bar {
