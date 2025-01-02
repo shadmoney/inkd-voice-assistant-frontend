@@ -55,13 +55,13 @@ export default function ContractPage() {
     <DashboardLayout>
       <div className="flex flex-col h-[calc(100vh-2rem)]">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-2 text-sm">
+        <div className="flex justify-between items-center mb-4 lg:mb-6 px-4 lg:px-0">
+          <div className="flex items-center space-x-2 text-sm overflow-x-auto whitespace-nowrap">
             <Link href="/contracts" className="text-gray-500 hover:text-gray-700">Contracts</Link>
             <span className="text-gray-500">/</span>
             <span className="text-gray-900">Thomas and Liras - Residential Sales Contract</span>
           </div>
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+          <button className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 shrink-0">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -70,9 +70,9 @@ export default function ContractPage() {
           </button>
         </div>
 
-        <div className="flex flex-1 space-x-6 overflow-hidden">
+        <div className="flex flex-col lg:flex-row flex-1 space-y-4 lg:space-y-0 lg:space-x-6 overflow-hidden px-4 lg:px-0">
           {/* Left Sidebar - Contract Actions */}
-          <div className="w-64 bg-white rounded-xl shadow-sm p-6 overflow-y-auto">
+          <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm p-4 lg:p-6 overflow-y-auto">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Contract Actions</h2>
             <div className="space-y-4">
               {contractActions.map((action, index) => (
@@ -96,14 +96,14 @@ export default function ContractPage() {
           </div>
 
           {/* Main Content - Contract Document */}
-          <div className="flex-1 bg-white rounded-xl shadow-sm p-6 overflow-y-auto">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-6">Residential Sales Contract (Virginia)</h1>
+          <div className="flex-1 bg-white rounded-xl shadow-sm p-4 lg:p-6 overflow-y-auto">
+            <h1 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4 lg:mb-6">Residential Sales Contract (Virginia)</h1>
             
-            <div className="space-y-8">
+            <div className="space-y-6 lg:space-y-8">
               {/* Real Property Section */}
               <div className="space-y-4">
                 <h2 className="text-lg font-medium text-gray-900">Real Property</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Legal Description</label>
                     <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" placeholder="Enter legal description" />
@@ -118,7 +118,7 @@ export default function ContractPage() {
               {/* Price and Financing Section */}
               <div className="space-y-4">
                 <h2 className="text-lg font-medium text-gray-900">Price and Financing</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Sales Price</label>
                     <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" placeholder="Enter sales price" />
@@ -141,7 +141,7 @@ export default function ContractPage() {
           </div>
 
           {/* Right Sidebar - Recipients */}
-          <div className="w-64 bg-white rounded-xl shadow-sm p-6 overflow-y-auto">
+          <div className="w-full lg:w-64 bg-white rounded-xl shadow-sm p-4 lg:p-6 overflow-y-auto">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Recipients</h2>
             <div className="space-y-4">
               {recipients.map((recipient, index) => (
@@ -167,8 +167,8 @@ export default function ContractPage() {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end mt-6">
-          <button className="inline-flex items-center px-6 py-3 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 transition-colors">
+        <div className="flex justify-end mt-4 lg:mt-6 px-4 lg:px-0">
+          <button className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-pink-600 text-white text-sm font-medium rounded-lg hover:bg-pink-700 transition-colors w-full sm:w-auto">
             Review & Send
           </button>
         </div>
