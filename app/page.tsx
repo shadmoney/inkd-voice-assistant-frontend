@@ -52,7 +52,7 @@ export default function Page() {
           className="w-full max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-8 shadow-lg"
         >
           <SimpleVoiceAssistant onStateChange={setAgentState} />
-          <p className="text-text-primary mt-4 mb-8">Tap to Redo</p>
+          <p className="text-text-primary mt-4 mb-8">Tap to Speak</p>
           <ControlBar
             onConnectButtonClicked={onConnectButtonClicked}
             agentState={agentState}
@@ -81,7 +81,7 @@ function SimpleVoiceAssistant(props: {
         className="agent-visualizer"
         options={{ 
           minHeight: 24,
-          
+
         }}
       />
     </div>
