@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import SearchBar from "../../components/SearchBar";
 import {
   LiveKitRoom,
   useVoiceAssistant,
@@ -39,7 +40,10 @@ export default function GenerateContract() {
 
   return (
     <DashboardLayout>
-      <main className="flex-1 flex flex-col items-center justify-center">
+      <main className="flex-1 flex flex-col items-center">
+        <div className="w-full max-w-2xl mb-8">
+          <SearchBar onSearch={(query) => console.log('Searching for:', query)} />
+        </div>
         <LiveKitRoom
           token={connectionDetails?.participantToken}
           serverUrl={connectionDetails?.serverUrl}

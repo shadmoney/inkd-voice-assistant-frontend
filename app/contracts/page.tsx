@@ -3,6 +3,7 @@
 import DashboardLayout from '../../components/DashboardLayout';
 import Link from 'next/link';
 import { usePrivy } from '@privy-io/react-auth';
+import SearchBar from '../../components/SearchBar';
 
 // Format wallet address to show first 6 and last 4 characters
 const formatAddress = (address: string) => {
@@ -44,7 +45,7 @@ const clients: Client[] = [
 
 export default function ContractsPage() {
   const { user } = usePrivy();
-  const displayName = user?.email?.toString() || formatAddress(user?.wallet?.address || '');
+  const displayName = user?.email?.address || formatAddress(user?.wallet?.address || '');
 
   return (
     <DashboardLayout>
@@ -74,6 +75,11 @@ export default function ContractsPage() {
           </svg>
           Generate a Contract
         </Link>
+      </div>
+
+      {/* Search Bar */}
+      <div className="mb-8">
+        <SearchBar onSearch={(query) => console.log('Searching for:', query)} />
       </div>
 
       {/* Contracts Section */}

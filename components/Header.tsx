@@ -19,8 +19,8 @@ const Header = () => {
     if (!user) return '';
     
     // For email users
-    if (user.email) {
-      return user.email.toString();
+    if (user.email?.address) {
+      return user.email.address;
     }
     
     // For wallet users

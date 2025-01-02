@@ -12,7 +12,7 @@ const formatAddress = (address: string) => {
 // Profile Section Component
 const ProfileSection = () => {
   const { user } = usePrivy();
-  const displayName = user?.email?.toString() || formatAddress(user?.wallet?.address || '');
+  const displayName = user?.email?.address || formatAddress(user?.wallet?.address || '');
   const initials = displayName.slice(0, 2).toUpperCase();
   
   return (
@@ -24,7 +24,7 @@ const ProfileSection = () => {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-900">{displayName}</h3>
-            <p className="text-gray-600">{user?.email?.toString() || 'Wallet Connected'}</p>
+            <p className="text-gray-600">{user?.email?.address || 'Wallet Connected'}</p>
           </div>
         </div>
         <button className="text-gray-400 hover:text-gray-600">
