@@ -9,12 +9,51 @@
 
 .agent-visualizer > .lk-audio-bar {
   width: 72px;
+  background-color: black !important;
+  transition: all 0.3s ease;
+}
+
+.agent-visualizer > .lk-audio-bar-container {
+  background-color: black;
+  border-radius: 12px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.agent-visualizer[data-lk-agent-state="speaking"] .lk-audio-bar {
+  background-color: #E91E63 !important;
+}
+
+.agent-visualizer[data-lk-agent-state="idle"] .lk-audio-bar {
+  background-color: #000000 !important;
+}
+
+.agent-visualizer[data-lk-agent-state="listening"] .lk-audio-bar {
+  background-color: #28a745 !important;
 }
 
 .lk-agent-control-bar {
   @apply border-t-0 p-0 h-min mr-4;
+  display: flex;
+  gap: 1rem;
+}
+
+.lk-agent-control-bar button {
+  @apply rounded-full p-4 shadow-lg transition-all duration-300;
+}
+
+.lk-agent-control-bar button[data-lk-muted="true"] {
+  @apply bg-red-500 hover:bg-red-600;
+}
+
+.lk-agent-control-bar button[data-lk-muted="false"] {
+  @apply bg-green-500 hover:bg-green-600;
 }
 
 .lk-disconnect-button {
-  @apply h-[36px] hover:bg-[#6b221a] hover:text-[white] bg-[#31100c] border-[#6b221a];
+  @apply rounded-full p-4 shadow-lg transition-all duration-300;
+  @apply bg-red-500 hover:bg-red-600 text-white;
+}
+
+.lk-disconnect-button:hover {
+  transform: scale(1.05);
 }

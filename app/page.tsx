@@ -36,7 +36,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-background">
       <Header />
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <LiveKitRoom
@@ -49,10 +49,10 @@ export default function Page() {
           onDisconnected={() => {
             updateConnectionDetails(undefined);
           }}
-          className="w-full max-w-2xl mx-auto flex flex-col items-center"
+          className="w-full max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-8 shadow-lg"
         >
           <SimpleVoiceAssistant onStateChange={setAgentState} />
-          <p className="text-gray-500 mt-4 mb-8">Tap to Redo</p>
+          <p className="text-text-primary mt-4 mb-8">Tap to Redo</p>
           <ControlBar
             onConnectButtonClicked={onConnectButtonClicked}
             agentState={agentState}
@@ -81,9 +81,7 @@ function SimpleVoiceAssistant(props: {
         className="agent-visualizer"
         options={{ 
           minHeight: 24,
-          gap: 12,
-          backgroundColor: "#000000",
-          barRadius: 12
+          
         }}
       />
     </div>
@@ -108,7 +106,7 @@ function ControlBar(props: {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.3 }}
-            className="bg-pink-500 text-white rounded-full p-4 shadow-lg hover:bg-pink-600 transition-colors"
+            className="bg-accent text-white rounded-full p-4 shadow-lg hover:bg-opacity-90 transition-colors"
             onClick={() => props.onConnectButtonClicked()}
           >
             <svg 
