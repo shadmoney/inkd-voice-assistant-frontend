@@ -1,13 +1,14 @@
 import React from 'react';
+import Link from 'next/link';
 
 const Header = () => {
   return (
     <header className="flex justify-between items-center p-6 bg-white border-b border-gray-100">
       {/* Left section */}
       <div className="flex flex-col">
-        <div className="text-3xl font-light mb-1 text-gray-800">ℯ</div>
+        <div className="text-3xl font-semibold mb-1 text-gray-800">Inkd</div>
         <div className="flex flex-col text-sm">
-          <span className="font-medium text-gray-800">Pages</span>
+          <Link href="/" className="font-medium text-gray-800 hover:text-pink-500 transition-colors">Pages</Link>
           <span className="text-gray-500">Generate</span>
         </div>
       </div>
