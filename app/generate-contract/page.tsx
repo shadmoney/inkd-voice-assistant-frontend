@@ -12,6 +12,7 @@ import {
   DisconnectButton,
 } from "@livekit/components-react";
 import { useCallback, useEffect, useState } from "react";
+import { usePrivy } from '@privy-io/react-auth';
 import { MediaDeviceFailure } from "livekit-client";
 import type { ConnectionDetails } from "../api/connection-details/route";
 import { NoAgentNotification } from "../../components/NoAgentNotification";
@@ -27,13 +28,20 @@ export default function GenerateContract() {
   const [showTapToSpeak, setShowTapToSpeak] = useState(true);
   const [connectionHealth, setConnectionHealth] = useState<'unknown' | 'healthy' | 'unhealthy'>('unknown');
 
+  const { user } = usePrivy();
+  
   const checkServerHealth = async () => {
+    if (!user?.id) {
+      setConnectionHealth('unhealthy');
+      throw new Error('User not authenticated');
+    }
     try {
       const url = new URL(
         process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? 
         "/api/connection-details",
         window.location.origin
       );
+      url.searchParams.set('userId', user.id);
       const response = await fetch(url.toString());
       if (!response.ok) {
         setConnectionHealth('unhealthy');
