@@ -8,39 +8,36 @@ interface NoAgentNotificationProps extends React.PropsWithChildren<object> {
  * Renders some user info when no agent connects to the room after a certain time.
  */
 export function NoAgentNotification(props: NoAgentNotificationProps) {
-  const timeToWaitMs = 10_000;
-  const timeoutRef = useRef<number | null>(null);
   const [showNotification, setShowNotification] = useState(false);
-  const agentHasConnected = useRef(false);
-
-  // If the agent has connected, we don't need to show the notification.
-  if (
-    ["listening", "thinking", "speaking"].includes(props.state) &&
-    agentHasConnected.current == false
-  ) {
-    agentHasConnected.current = true;
-  }
+  const timeoutRef = useRef<number | null>(null);
+  const hasShownNotification = useRef(false);
 
   useEffect(() => {
-    if (props.state === "connecting") {
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    if (props.state === "connecting" && !hasShownNotification.current) {
+      // Set a timeout to show the notification after 10 seconds if still connecting
       timeoutRef.current = window.setTimeout(() => {
-        if (
-          props.state === "connecting" &&
-          agentHasConnected.current === false
-        ) {
+        if (props.state === "connecting") {
           setShowNotification(true);
+          hasShownNotification.current = true;
         }
-      }, timeToWaitMs);
-    } else {
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-      }
+      }, 10000);
+    } else if (props.state === "disconnected") {
+      // Reset the notification state when disconnected
+      hasShownNotification.current = false;
+      setShowNotification(false);
+    } else if (["listening", "thinking", "speaking"].includes(props.state)) {
+      // Hide notification when agent is active
       setShowNotification(false);
     }
 
     return () => {
       if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
+        clearTimeout(timeoutRef.current);
       }
     };
   }, [props.state]);

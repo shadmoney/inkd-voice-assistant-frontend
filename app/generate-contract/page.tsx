@@ -25,17 +25,50 @@ export default function GenerateContract() {
   >(undefined);
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [showTapToSpeak, setShowTapToSpeak] = useState(true);
+  const [connectionHealth, setConnectionHealth] = useState<'unknown' | 'healthy' | 'unhealthy'>('unknown');
+
+  const checkServerHealth = async () => {
+    try {
+      const url = new URL(
+        process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? 
+        "/api/connection-details",
+        window.location.origin
+      );
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        setConnectionHealth('unhealthy');
+        throw new Error('Failed to connect to voice agent server');
+      }
+      const details = await response.json();
+      setConnectionHealth('healthy');
+      return details;
+    } catch (error) {
+      console.error('Connection health check failed:', error);
+      setConnectionHealth('unhealthy');
+      throw error;
+    }
+  };
 
   const onConnectButtonClicked = useCallback(async () => {
-    const url = new URL(
-      process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ??
-      "/api/connection-details",
-      window.location.origin
-    );
-    const response = await fetch(url.toString());
-    const connectionDetailsData = await response.json();
-    updateConnectionDetails(connectionDetailsData);
+    setAgentState("connecting");
     setShowTapToSpeak(false);
+    
+    // Set a timeout to check connection health
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Connection timeout')), 10000);
+    });
+
+    try {
+      const connectionDetailsData = await Promise.race([
+        checkServerHealth(),
+        timeoutPromise
+      ]);
+      updateConnectionDetails(connectionDetailsData);
+    } catch (error) {
+      console.error('Connection failed:', error);
+      setConnectionHealth('unhealthy');
+      setAgentState("disconnected");
+    }
   }, []);
 
   return (
@@ -57,6 +90,11 @@ export default function GenerateContract() {
           className="w-full max-w-[90%] sm:max-w-2xl mx-auto flex flex-col items-center bg-white rounded-lg p-4 sm:p-8"
         >
           <SimpleVoiceAssistant onStateChange={setAgentState} />
+          {connectionHealth === 'unhealthy' && agentState !== "connecting" && (
+            <div className="text-red-500 mb-4">
+              Connection to voice agent server is currently unavailable
+            </div>
+          )}
           {showTapToSpeak}
           <ControlBar
             onConnectButtonClicked={onConnectButtonClicked}
@@ -118,6 +156,18 @@ function ControlBar(props: {
         )}
       </AnimatePresence>
       <AnimatePresence>
+        {props.agentState === "connecting" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
+            className="flex items-center space-x-2"
+          >
+            <div className="animate-spin w-5 h-5 border-2 border-accent border-t-transparent rounded-full" />
+            <span className="text-gray-600">Connecting...</span>
+          </motion.div>
+        )}
         {props.agentState !== "disconnected" &&
           props.agentState !== "connecting" && (
             <motion.div
