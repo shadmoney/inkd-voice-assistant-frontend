@@ -26,13 +26,13 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-black opacity-90"></div>
         <div className="relative z-10 text-center">
           <div className="mb-8">
-            <Image src="/inkd-logo.svg" alt="Inkd Logo" width={200} height={100} className="mx-auto" />
+            <Image src="/Logo-01.svg" alt="Inkd Logo" width={200} height={100} className="mx-auto" />
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">
-            Secure. Simple. Seamless Login.
+          Effortless Access to Smarter Real Estate.
           </h2>
           <p className="text-gray-300 max-w-md mx-auto">
-            Experience privacy-focused authentication powered by cutting-edge technology.
+          Log in securely and unlock the power of AI-driven contract generation.
           </p>
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function LoginPage() {
         <div className="w-full max-w-[90%] sm:max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-6 sm:mb-8 text-center">
-            <Image src="/inkd-logo.svg" alt="Inkd Logo" width={120} height={60} className="mx-auto" />
+            <Image src="/Logo-01.svg" alt="Inkd Logo" width={120} height={60} className="mx-auto" />
           </div>
 
           <div className="text-center mb-6 sm:mb-8">

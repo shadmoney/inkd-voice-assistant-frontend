@@ -11,7 +11,7 @@ export default function Sidebar() {
     <aside className="w-64 h-screen bg-white border-r border-gray-200 overflow-y-auto">
       <div className="px-4 sm:px-6 py-6 sm:py-8">
         <Image
-          src="/inkd-logo.svg"
+          src="/Logo-01.svg"
           alt="Inkd Logo"
           width={120}
           height={40}

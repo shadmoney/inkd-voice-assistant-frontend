@@ -21,6 +21,10 @@ import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
 import DashboardLayout from "../../components/DashboardLayout";
 import { PDFDocument, PDFField } from 'pdf-lib';
 
+type VoiceAssistantWithTranscript = ReturnType<typeof useVoiceAssistant> & {
+  transcript?: string;
+};
+
 interface ContractData {
   propertyAddress: string;
   buyerName: string;
@@ -59,6 +63,7 @@ export default function GenerateContract() {
     otherTerms: ''
   });
   const [modifiedPdfUrl, setModifiedPdfUrl] = useState<string>('');
+  const [activeField, setActiveField] = useState<keyof ContractData | null>(null);
 
   const { user, authenticated } = usePrivy();
   const { login } = useLogin();
@@ -201,7 +206,31 @@ export default function GenerateContract() {
       [name]: value
     };
     setContractData(updatedData);
+    setActiveField(name as keyof ContractData);
     modifyPdf(updatedData);
+    
+    // Clear active field after a delay
+    setTimeout(() => {
+      setActiveField(null);
+    }, 2000);
+  };
+
+  // Function to update form field from voice input
+  const updateFieldFromVoice = (field: keyof ContractData, value: string) => {
+    setActiveField(field);
+    setContractData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      modifyPdf(updated);
+      return updated;
+    });
+    
+    // Clear active field after a delay
+    setTimeout(() => {
+      setActiveField(null);
+    }, 2000);
   };
 
   useEffect(() => {
@@ -256,7 +285,10 @@ export default function GenerateContract() {
               }}
               className="w-full flex flex-col items-center bg-white rounded-lg p-4 sm:p-8"
             >
-              <SimpleVoiceAssistant onStateChange={setAgentState} />
+              <SimpleVoiceAssistant 
+                onStateChange={setAgentState}
+                onVoiceInput={updateFieldFromVoice}
+              />
               {connectionHealth === 'unhealthy' && agentState !== "connecting" && (
                 <div className="text-red-500 mb-4">
                   Connection to voice agent server is currently unavailable
@@ -288,7 +320,11 @@ export default function GenerateContract() {
                     name="propertyAddress"
                     value={contractData.propertyAddress}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                      activeField === 'propertyAddress' 
+                      ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                      : 'border-gray-300'
+                    }`}
                     placeholder="Enter complete property address"
                   />
                 </div>
@@ -302,7 +338,11 @@ export default function GenerateContract() {
                       name="buyerName"
                       value={contractData.buyerName}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                        activeField === 'buyerName'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-300'
+                      }`}
                       placeholder="Enter buyer's name"
                     />
                   </div>
@@ -315,7 +355,11 @@ export default function GenerateContract() {
                       name="sellerName"
                       value={contractData.sellerName}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                        activeField === 'sellerName'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-300'
+                      }`}
                       placeholder="Enter seller's name"
                     />
                   </div>
@@ -330,7 +374,11 @@ export default function GenerateContract() {
                       name="purchasePrice"
                       value={contractData.purchasePrice}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                        activeField === 'purchasePrice'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-300'
+                      }`}
                       placeholder="Enter purchase price"
                     />
                   </div>
@@ -343,7 +391,11 @@ export default function GenerateContract() {
                       name="downPayment"
                       value={contractData.downPayment}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                        activeField === 'downPayment'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-300'
+                      }`}
                       placeholder="Enter down payment amount"
                     />
                   </div>
@@ -382,7 +434,11 @@ export default function GenerateContract() {
                     name="financingType"
                     value={contractData.financingType}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                      activeField === 'financingType'
+                      ? 'border-blue-500 bg-blue-50 shadow-sm'
+                      : 'border-gray-300'
+                    }`}
                   >
                     <option value="">Select financing type</option>
                     <option value="Conventional">Conventional</option>
@@ -401,7 +457,11 @@ export default function GenerateContract() {
                     name="buyerDeposit"
                     value={contractData.buyerDeposit}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                      activeField === 'buyerDeposit'
+                      ? 'border-blue-500 bg-blue-50 shadow-sm'
+                      : 'border-gray-300'
+                    }`}
                     placeholder="Enter earnest money deposit"
                   />
                 </div>
@@ -415,7 +475,11 @@ export default function GenerateContract() {
                       name="closingDate"
                       value={contractData.closingDate}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                        activeField === 'closingDate'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-300'
+                      }`}
                     />
                   </div>
                   <div>
@@ -427,7 +491,11 @@ export default function GenerateContract() {
                       name="inspectionPeriod"
                       value={contractData.inspectionPeriod}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                        activeField === 'inspectionPeriod'
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
+                        : 'border-gray-300'
+                      }`}
                       placeholder="Enter days for inspection"
                     />
                   </div>
@@ -440,7 +508,11 @@ export default function GenerateContract() {
                     name="contingencies"
                     value={contractData.contingencies}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                      activeField === 'contingencies'
+                      ? 'border-blue-500 bg-blue-50 shadow-sm'
+                      : 'border-gray-300'
+                    }`}
                     rows={3}
                     placeholder="Enter any contingencies"
                   />
@@ -453,7 +525,11 @@ export default function GenerateContract() {
                     name="otherTerms"
                     value={contractData.otherTerms}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${
+                      activeField === 'otherTerms'
+                      ? 'border-blue-500 bg-blue-50 shadow-sm'
+                      : 'border-gray-300'
+                    }`}
                     rows={3}
                     placeholder="Enter any additional terms"
                   />
@@ -486,13 +562,76 @@ export default function GenerateContract() {
 
 function SimpleVoiceAssistant(props: {
   onStateChange: (state: AgentState) => void;
+  onVoiceInput: (field: keyof ContractData, value: string) => void;
 }) {
-  const { state, audioTrack } = useVoiceAssistant();
+  const assistant = useVoiceAssistant() as VoiceAssistantWithTranscript;
+  const { state, audioTrack, transcript } = assistant;
+  const [lastProcessedTranscript, setLastProcessedTranscript] = useState('');
+
   useEffect(() => {
     props.onStateChange(state);
   }, [props, state]);
+
+  useEffect(() => {
+    if (transcript && transcript !== lastProcessedTranscript) {
+      setLastProcessedTranscript(transcript);
+      
+      // Process voice input and update form fields
+      const processVoiceInput = () => {
+        const text = transcript.toLowerCase();
+        
+        // Map common phrases to form fields
+        const fieldMappings = {
+          'property address': 'propertyAddress',
+          'buyer name': 'buyerName',
+          'seller name': 'sellerName',
+          'purchase price': 'purchasePrice',
+          'down payment': 'downPayment',
+          'financing type': 'financingType',
+          'buyer deposit': 'buyerDeposit',
+          'closing date': 'closingDate',
+          'inspection period': 'inspectionPeriod',
+          'contingencies': 'contingencies',
+          'other terms': 'otherTerms'
+        };
+
+        // Check for field matches and update form
+        Object.entries(fieldMappings).forEach(([phrase, field]) => {
+          if (text.includes(phrase)) {
+            const value = text.split(phrase)[1]?.trim();
+            if (value) {
+              window.dispatchEvent(new CustomEvent('voiceInput', {
+                detail: { field, value }
+              }));
+            }
+          }
+        });
+      };
+
+      processVoiceInput();
+    }
+  }, [transcript, lastProcessedTranscript]);
+
+  // Add event listener for voice input
+  useEffect(() => {
+    const handleVoiceInput = (event: CustomEvent) => {
+      const { field, value } = event.detail;
+      props.onVoiceInput(field as keyof ContractData, value);
+    };
+
+    window.addEventListener('voiceInput', handleVoiceInput as EventListener);
+    return () => {
+      window.removeEventListener('voiceInput', handleVoiceInput as EventListener);
+    };
+  }, []);
+
   return (
     <div className="h-[200px] sm:h-[300px] w-full mx-auto flex flex-col items-center justify-center">
+      {transcript && (
+        <div className="text-sm text-gray-600 mb-4 text-center">
+          {transcript}
+        </div>
+      )}
       <BarVisualizer
         state={state}
         barCount={3}
