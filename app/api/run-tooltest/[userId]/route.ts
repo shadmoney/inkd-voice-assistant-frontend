@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { userId: string } }
+) {
   try {
+    const userId = params.userId;
+    if (!userId) {
+      throw new Error('Unauthorized: No user ID provided');
+    }
+
     // Get contract data from request body
     const contractData = await request.json();
 
     // Call backend API to run tooltest
     const backendResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/run-tooltest`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/run-tooltest/${userId}`,
       {
         method: 'POST',
         headers: {
@@ -30,7 +39,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ 
         message: "Contract generation started",
         status: "generating",
-        url: data.url
+        url: data.url,
+        contractId: data.contractId // Pass through the contract ID from backend
       });
     }
     

@@ -1,8 +1,23 @@
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+import { NextRequest } from 'next/server';
+
+export async function GET(request: NextRequest) {
   try {
-    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/latest-contract`;
+    const userId = request.headers.get('x-user-id');
+    if (!userId) {
+      throw new Error('Unauthorized: No user ID provided');
+    }
+
+    // Get contract_id from query params
+    const searchParams = request.nextUrl.searchParams;
+    const contractId = searchParams.get('contract_id');
+
+    // Build URL with optional contract_id
+    let backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/latest-contract/${userId}`;
+    if (contractId) {
+      backendUrl += `?contract_id=${contractId}`;
+    }
     console.log('Fetching from backend URL:', backendUrl);
 
     // Call backend API to get latest contract
@@ -17,7 +32,20 @@ export async function GET() {
 
     const data = await backendResponse.json();
     console.log('Backend response data:', data);
-    return NextResponse.json(data);
+    
+    // Extract timestamp from URL if it exists
+    let lastModified = '';
+    if (data.url) {
+      const match = data.url.match(/ResidentialSalesContract_(\d{4}-\d{2}-\d{2}-\d{6})/);
+      if (match) {
+        lastModified = match[1];
+      }
+    }
+    
+    return NextResponse.json({
+      ...data,
+      lastModified
+    });
   } catch (error) {
     console.error('Error fetching latest contract:', error);
     return NextResponse.json(

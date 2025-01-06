@@ -9,6 +9,7 @@ from s3_utils import S3Utils
 import json
 import os
 import sys
+import time
 from urllib.parse import urlparse
 import requests
 import uuid
@@ -302,9 +303,11 @@ if __name__ == "__main__":
         contract_data = json.load(sys.stdin)
         print("Received contract data:", contract_data)
         
-        # Extract user_id from the input data
+        # Extract user_id and contract_id from the input data
         user_id = contract_data.pop("user_id", None)
+        contract_id = contract_data.pop("contract_id", None)
         print("User ID:", user_id)
+        print("Contract ID:", contract_id)
         
         # Convert the data to the format expected by ContractData
         formatted_data = {
@@ -321,19 +324,27 @@ if __name__ == "__main__":
         template_path = "templates/VAResidentialSalesContractP1.pdf"
         filled_pdf = fill_contract(contract, template_path)
         
-        # Save locally first
-        timestamp = date.today().strftime("%Y-%m-%d-%H%M%S")
-        local_path = os.path.join("output", f"contract_{timestamp}.pdf")
-        os.makedirs("output", exist_ok=True)
+        # Generate timestamp in consistent format
+        timestamp = time.strftime("%Y-%m-%d-%H%M%S")
+        filename = f"ResidentialSalesContract_{timestamp}.pdf"
         
-        with open(local_path, "wb") as f:
-            f.write(filled_pdf)
-            
-        # Upload to S3 with user_id for folder organization
+        # Upload directly to S3 without saving locally
         s3 = S3Utils()
-        s3_url = s3.upload_file(filled_pdf, f"contract_{timestamp}.pdf", user_id)
+        if not user_id:
+            raise Exception("user_id is required for uploading contracts")
+            
+        print(f"Uploading contract for user {user_id} with timestamp {timestamp}")
+        print(f"File path will be: {user_id}/contracts/{timestamp}/{filename}")
+            
+        s3_url = s3.upload_file(
+            file_content=filled_pdf,
+            file_name=filename,
+            user_id=user_id,
+            timestamp=timestamp
+        )
+        print(f"Successfully uploaded contract to: {s3_url}")
         
-        print("Contract generated successfully")
+        print(f"Contract generated successfully: {s3_url}")
         sys.exit(0)
         
     except Exception as e:

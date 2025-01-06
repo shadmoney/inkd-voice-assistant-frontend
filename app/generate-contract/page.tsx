@@ -129,40 +129,55 @@ export default function GenerateContract() {
   const [connectionHealth, setConnectionHealth] = useState<'unknown' | 'healthy' | 'unhealthy'>('unknown');
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isContractGenerating, setIsContractGenerating] = useState(false);
-  const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
   const { user, authenticated } = usePrivy();
 
-  // Start polling when contract generation begins
+  // Poll for contract status only when voice session is active
   useEffect(() => {
-    if (isContractGenerating) {
-      const interval = setInterval(async () => {
-        try {
-          const response = await fetch('/api/latest-contract');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.url) {
+    if (!user?.id || agentState === "disconnected") return;
+
+    const checkContractStatus = async () => {
+      try {
+        const response = await fetch(`/api/contract-status/${user.id}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Only update if we find a contract generated in the last 30 seconds
+          if (data.url && data.generated && data.timestamp) {
+            const contractTime = new Date(data.timestamp).getTime();
+            const thirtySecondsAgo = Date.now() - 30000;
+            
+            if (contractTime > thirtySecondsAgo) {
+              console.log('New contract found:', data.url);
               setPdfUrl(data.url);
-              setIsContractGenerating(false);
-              if (pollInterval) {
-                clearInterval(pollInterval);
-                setPollInterval(null);
-              }
+              // Stop polling by clearing the interval
+              return true;
             }
           }
-        } catch (error) {
-          console.error('Error checking contract status:', error);
         }
-      }, 2000); // Poll every 2 seconds
-      setPollInterval(interval);
-    }
-    return () => {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        setPollInterval(null);
+        return false;
+      } catch (error) {
+        console.error('Error checking contract status:', error);
+        return false;
       }
     };
-  }, [isContractGenerating, pollInterval]);
+
+    // Set up polling that stops when a recent contract is found
+    const interval = setInterval(async () => {
+      const found = await checkContractStatus();
+      if (found) {
+        clearInterval(interval);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [user?.id, agentState]);
+
+  // Reset to empty contract when voice session ends or starts
+  useEffect(() => {
+    if (agentState === "disconnected" || agentState === "connecting") {
+      fetchEmptyContract();
+    }
+  }, [agentState]);
 
   const verifyPdfUrl = async (url: string): Promise<boolean> => {
     try {
@@ -230,21 +245,14 @@ export default function GenerateContract() {
         window.location.origin
       );
       url.searchParams.set('userId', user.id);
-      console.log('Checking server health at:', url.toString());
-
       const response = await fetch(url.toString());
       const responseText = await response.text();
-      console.log('Server response:', response.status, responseText);
 
       if (!response.ok) {
         throw new Error(`Failed to connect to voice agent server: ${responseText}`);
       }
 
       const details = JSON.parse(responseText);
-      console.log('Connection details:', {
-        ...details,
-        participantToken: 'Token received'  // Don't log the actual token
-      });
 
       setConnectionHealth('healthy');
       return details;
@@ -286,7 +294,6 @@ export default function GenerateContract() {
       setAgentState("disconnected");
     }
   }, [authenticated, login]);
-
 
   return (
     <DashboardLayout>
@@ -334,16 +341,6 @@ export default function GenerateContract() {
                   agentState={agentState}
                 />
                 <RoomAudioRenderer />
-                {isContractGenerating && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 text-center"
-                  >
-                    <p className="text-gray-600 mb-3">Generating your contract...</p>
-                    <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto"></div>
-                  </motion.div>
-                )}
                 <NoAgentNotification state={agentState} />
               </div>
             </LiveKitRoom>
