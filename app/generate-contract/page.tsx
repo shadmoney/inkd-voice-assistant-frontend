@@ -71,7 +71,7 @@ function ControlBar(props: {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative flex justify-center">
       <AnimatePresence>
         {props.agentState === "disconnected" && (
           <motion.button
@@ -127,9 +127,94 @@ export default function GenerateContract() {
   >(undefined);
   const [agentState, setAgentState] = useState<AgentState>("disconnected");
   const [connectionHealth, setConnectionHealth] = useState<'unknown' | 'healthy' | 'unhealthy'>('unknown');
-  const pdfUrl = "https://inkd-contracts.s3.us-east-1.amazonaws.com/Filled%20VA%20Sales%20Contract.pdf";
-
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isContractGenerating, setIsContractGenerating] = useState(false);
+  const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
   const { user, authenticated } = usePrivy();
+
+  // Start polling when contract generation begins
+  useEffect(() => {
+    if (isContractGenerating) {
+      const interval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/latest-contract');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.url) {
+              setPdfUrl(data.url);
+              setIsContractGenerating(false);
+              if (pollInterval) {
+                clearInterval(pollInterval);
+                setPollInterval(null);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error checking contract status:', error);
+        }
+      }, 2000); // Poll every 2 seconds
+      setPollInterval(interval);
+    }
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        setPollInterval(null);
+      }
+    };
+  }, [isContractGenerating, pollInterval]);
+
+  const verifyPdfUrl = async (url: string): Promise<boolean> => {
+    try {
+      const response = await fetch(url);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const fetchEmptyContract = async () => {
+    try {
+      setIsLoading(true);
+
+      // Try API endpoint first
+      const response = await fetch('/api/empty-contract');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url) {
+          const isAccessible = await verifyPdfUrl(data.url);
+          if (isAccessible) {
+            setPdfUrl(data.url);
+            return;
+          }
+        }
+      }
+
+      // Try direct S3 URL as fallback
+      const s3Url = `https://inkd-contracts.s3.us-east-1.amazonaws.com/VAResidentialSalesContractP1.pdf`;
+      const isS3Accessible = await verifyPdfUrl(s3Url);
+      if (isS3Accessible) {
+        setPdfUrl(s3Url);
+        return;
+      }
+
+      // Use local file as final fallback
+      console.log('Using local PDF file as fallback');
+      setPdfUrl('/empty-contract.pdf');
+
+    } catch (error) {
+      console.error('Error fetching empty contract:', error);
+      // Default to local file on error
+      setPdfUrl('/empty-contract.pdf');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmptyContract();
+  }, []);
+
   const { login } = useLogin();
   
   const checkServerHealth = async () => {
@@ -145,12 +230,22 @@ export default function GenerateContract() {
         window.location.origin
       );
       url.searchParams.set('userId', user.id);
+      console.log('Checking server health at:', url.toString());
+
       const response = await fetch(url.toString());
+      const responseText = await response.text();
+      console.log('Server response:', response.status, responseText);
+
       if (!response.ok) {
-        setConnectionHealth('unhealthy');
-        throw new Error('Failed to connect to voice agent server');
+        throw new Error(`Failed to connect to voice agent server: ${responseText}`);
       }
-      const details = await response.json();
+
+      const details = JSON.parse(responseText);
+      console.log('Connection details:', {
+        ...details,
+        participantToken: 'Token received'  // Don't log the actual token
+      });
+
       setConnectionHealth('healthy');
       return details;
     } catch (error) {
@@ -225,20 +320,32 @@ export default function GenerateContract() {
               }}
               className="w-full flex flex-col items-center bg-white rounded-lg p-4 sm:p-8"
             >
-              <SimpleVoiceAssistant 
-                onStateChange={setAgentState}
-              />
-              {connectionHealth === 'unhealthy' && agentState !== "connecting" && (
-                <div className="text-red-500 mb-4">
-                  Connection to voice agent server is currently unavailable
-                </div>
-              )}
-              <ControlBar
-                onConnectButtonClicked={onConnectButtonClicked}
-                agentState={agentState}
-              />
-              <RoomAudioRenderer />
-              <NoAgentNotification state={agentState} />
+              <div className="w-full">
+                <SimpleVoiceAssistant 
+                  onStateChange={setAgentState}
+                />
+                {connectionHealth === 'unhealthy' && agentState !== "connecting" && (
+                  <div className="text-red-500 mb-4">
+                    Connection to voice agent server is currently unavailable
+                  </div>
+                )}
+                <ControlBar
+                  onConnectButtonClicked={onConnectButtonClicked}
+                  agentState={agentState}
+                />
+                <RoomAudioRenderer />
+                {isContractGenerating && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 text-center"
+                  >
+                    <p className="text-gray-600 mb-3">Generating your contract...</p>
+                    <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto"></div>
+                  </motion.div>
+                )}
+                <NoAgentNotification state={agentState} />
+              </div>
             </LiveKitRoom>
           )}
         </div>
@@ -252,6 +359,14 @@ export default function GenerateContract() {
                   data={pdfUrl}
                   type="application/pdf"
                   className="w-full h-full"
+                  onError={(e) => {
+                    console.error('Error loading PDF:', e);
+                    // If not already using local file, try it as fallback
+                    if (pdfUrl !== '/empty-contract.pdf') {
+                      console.log('Falling back to local PDF file');
+                      setPdfUrl('/empty-contract.pdf');
+                    }
+                  }}
                 >
                   <div className="flex flex-col items-center justify-center h-full">
                     <p className="text-gray-600 mb-4">Unable to display PDF directly.</p>
@@ -278,19 +393,19 @@ export default function GenerateContract() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full">
-                {pdfUrl === null ? (
+                {isLoading ? (
+                  <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                ) : pdfUrl === null ? (
                   <div className="text-center">
-                    <p className="text-red-500 mb-4">Failed to load contract form</p>
+                    <p className="text-red-500 mb-4">Failed to load contract form. Please check the console for error details.</p>
                     <button
-                      onClick={fetchContractForm}
+                      onClick={fetchEmptyContract}
                       className="bg-accent text-white px-4 py-2 rounded hover:bg-opacity-90"
                     >
-                      Retry
+                      Retry Loading Contract
                     </button>
                   </div>
-                ) : (
-                  <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
-                )}
+                ) : null}
               </div>
             )}
           </div>

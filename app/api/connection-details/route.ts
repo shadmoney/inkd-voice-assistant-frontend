@@ -6,9 +6,9 @@ import {
 import { NextResponse } from "next/server";
 
 // NOTE: you are expected to define the following environment variables in `.env.local`:
-const API_KEY = process.env.LIVEKIT_API_KEY;
-const API_SECRET = process.env.LIVEKIT_API_SECRET;
-const LIVEKIT_URL = process.env.LIVEKIT_URL;
+const API_KEY = process.env.NEXT_PUBLIC_LIVEKIT_API_KEY;
+const API_SECRET = process.env.NEXT_PUBLIC_LIVEKIT_API_SECRET;
+const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL;
 
 export type ConnectionDetails = {
   serverUrl: string;
@@ -17,15 +17,35 @@ export type ConnectionDetails = {
   participantToken: string;
 };
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400'
+    }
+  });
+}
+
 export async function GET(request: Request) {
-  // Get user identity from query params
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('userId');
-  
-  if (!userId) {
-    return new NextResponse('User ID is required', { status: 400 });
-  }
   try {
+    // Get user identity from query params
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    
+    if (!userId) {
+      return new NextResponse('User ID is required', { status: 400 });
+    }
+
+    console.log('Connection details request for user:', userId);
+    console.log('Environment variables:', {
+      LIVEKIT_URL,
+      API_KEY: API_KEY ? 'Set' : 'Not set',
+      API_SECRET: API_SECRET ? 'Set' : 'Not set'
+    });
+
     if (LIVEKIT_URL === undefined) {
       throw new Error("LIVEKIT_URL is not defined");
     }
@@ -46,17 +66,36 @@ export async function GET(request: Request) {
 
     // Return connection details
     const data: ConnectionDetails = {
-      serverUrl: LIVEKIT_URL,
+      serverUrl: LIVEKIT_URL,  // Keep WebSocket URL for LiveKit connection
       roomName,
       participantToken: participantToken,
       participantName: participantIdentity,
     };
-    return NextResponse.json(data);
+    console.log('Generated connection details:', {
+      ...data,
+      participantToken: 'Token generated'  // Don't log the actual token
+    });
+
+    return NextResponse.json(data, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
   } catch (error) {
+    console.error('Error in connection-details:', error);
     if (error instanceof Error) {
-      console.error(error);
-      return new NextResponse(error.message, { status: 500 });
+      return new NextResponse(error.message, { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
 

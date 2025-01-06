@@ -1,4 +1,7 @@
 import logging
+import aiohttp
+import os
+import json
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -8,6 +11,7 @@ from livekit.agents import (
     WorkerOptions,
     cli,
     llm,
+    AgentState,
 )
 from livekit.agents.llm import (
     ChatContext, 
@@ -20,7 +24,7 @@ from livekit.agents.pipeline import VoicePipelineAgent
 from livekit.agents import DEFAULT_API_CONNECT_OPTIONS
 from livekit.plugins import openai, deepgram, silero
 from langchain_core.runnables import RunnableConfig
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage, FunctionMessage
 from langgraph.checkpoint.memory import MemorySaver
 from typing import Callable, Any, Union, AsyncIterator, Optional, Literal
 
@@ -77,6 +81,7 @@ class LangGraphStream(llm.LLMStream):
         self.graph_app = graph_app
         self._llm = llm
         self._message_history = []  # Store message history
+        self._has_generated_contract = False  # Track if contract was generated
 
     async def _main_task(self) -> None:
         """Main task that processes messages through the graph"""
@@ -109,6 +114,10 @@ class LangGraphStream(llm.LLMStream):
             # Store the assistant's response in history
             self._message_history.append(last_message)
             
+            # Check if this was a function call to generate_contract
+            if isinstance(last_message, FunctionMessage) and "generate_contract" in last_message.content:
+                self._has_generated_contract = True
+
             # Send response as a chunk
             self._event_ch.send_nowait(
                 ChatChunk(
@@ -124,9 +133,93 @@ class LangGraphStream(llm.LLMStream):
                 )
             )
 
+            # If we have all required info but haven't generated contract, do it now
+            if not self._has_generated_contract and self._has_all_required_info():
+                await self._generate_contract()
+
         except Exception as e:
             logger.error(f"Error processing through graph: {e}")
             raise
+
+    def _has_all_required_info(self) -> bool:
+        """Check if we have all required contract information"""
+        required_fields = {
+            "buyer_name": False,
+            "street_address": False,
+            "sales_price": False,
+            "down_payment_amount": False,
+            "financing_contingent": False,
+            "conventional_financing": False
+        }
+        
+        for message in self._message_history:
+            if isinstance(message, FunctionMessage):
+                # Extract field values from function calls
+                content = message.content
+                if isinstance(content, str):
+                    for field in required_fields:
+                        if f'"{field}":' in content:
+                            required_fields[field] = True
+                            
+        return all(required_fields.values())
+
+    async def _generate_contract(self) -> None:
+        """Generate contract using collected information"""
+        try:
+            # Extract the latest contract data from message history
+            contract_data = {}
+            for message in reversed(self._message_history):
+                if isinstance(message, FunctionMessage):
+                    content = message.content
+                    if isinstance(content, str) and "generate_contract" in content:
+                        # Extract the contract data
+                        start_idx = content.find("{")
+                        end_idx = content.rfind("}") + 1
+                        if start_idx != -1 and end_idx != -1:
+                            contract_data = json.loads(content[start_idx:end_idx])
+                            break
+            
+            if contract_data:
+                # Validate required fields are present
+                required_fields = [
+                    "sales_price",
+                    "down_payment_amount",
+                    "buyer_name",
+                    "street_address",
+                    "conventional_financing",
+                    "financing_contingent"
+                ]
+                
+                if all(field in contract_data for field in required_fields):
+                    try:
+                        # Call run-tooltest endpoint to generate contract
+                        backend_url = os.getenv('NEXT_PUBLIC_BACKEND_URL', 'http://localhost:8000')
+                        async with aiohttp.ClientSession() as session:
+                            async with session.post(
+                                f"{backend_url}/run-tooltest",
+                                json=contract_data
+                            ) as response:
+                                if response.status == 200:
+                                    response_data = await response.json()
+                                    if response_data.get('url'):
+                                        await self.say("I've collected all the necessary information and generated the contract. You can view it on the page now.", allow_interruptions=True)
+                                        self._has_generated_contract = True
+                                        logger.info("Contract generated successfully")
+                                    else:
+                                        raise Exception("No URL in response")
+                                else:
+                                    raise Exception(f"Failed to generate contract: {await response.text()}")
+                            
+                    except Exception as e:
+                        logger.error(f"Error running tooltest: {e}")
+                        await self.say("I apologize, but there was an error generating the contract. Please try again.", allow_interruptions=True)
+                else:
+                    missing_fields = [field for field in required_fields if field not in contract_data]
+                    logger.error(f"Missing required fields: {missing_fields}")
+                    await self.say("I still need some information before I can generate the contract. Let me ask you about those details.", allow_interruptions=True)
+                
+        except Exception as e:
+            logger.error(f"Error auto-generating contract: {e}")
 
     async def _run(self) -> None:
         """Run the stream processing"""
