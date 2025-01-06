@@ -21,6 +21,7 @@ from config import (
     CONTRACT_TEMPLATE_PATH, OUTPUT_DIR
 )
 from tools import ContractData, fill_contract
+from s3_utils import S3Utils
 
 # Define contract generation tool 
 @tool
@@ -95,10 +96,23 @@ def generate_contract(
             
         pdf_content = fill_contract(contract, CONTRACT_TEMPLATE_PATH)
         
-        # Save to file
-        output_path = os.path.join(OUTPUT_DIR, f"contract_{uuid.uuid4().hex[:8]}.pdf")
+        # Generate filename
+        filename = f"contract_{uuid.uuid4().hex[:8]}.pdf"
+        output_path = os.path.join(OUTPUT_DIR, filename)
+        
+        # Save locally
         with open(output_path, "wb") as f:
             f.write(pdf_content)
+            
+        # Upload to S3 in output directory
+        s3 = S3Utils()
+        s3_key = f"output/{filename}"
+        s3.s3_client.put_object(
+            Bucket=s3.bucket_name,
+            Key=s3_key,
+            Body=pdf_content,
+            ContentType='application/pdf'
+        )
             
         return f"Contract generated successfully and saved to: {output_path}"
         

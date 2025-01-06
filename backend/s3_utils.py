@@ -107,7 +107,7 @@ class S3Utils:
 
     def get_latest_contract(self) -> str:
         """
-        Get the latest contract from the S3 bucket
+        Get the latest contract from the output directory in the S3 bucket
         
         Returns:
             str: Presigned URL for downloading the latest contract
@@ -117,10 +117,10 @@ class S3Utils:
         """
         try:
             print(f"Attempting to list objects in bucket: {self.bucket_name}")
-            # List all objects in the bucket
+            # List objects in the output directory
             response = self.s3_client.list_objects_v2(
                 Bucket=self.bucket_name,
-                Prefix='',  # List all objects
+                Prefix='output/',  # Only list objects in the output directory
             )
             
             print(f"S3 list_objects_v2 response: {response}")
