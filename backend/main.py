@@ -1,5 +1,5 @@
 # main.py
-from typing import Annotated, TypedDict, Dict, Any, List, Sequence, Union
+from typing import Annotated, TypedDict, Dict, Any, List, Sequence, Union, Optional
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_groq import ChatGroq
@@ -14,72 +14,93 @@ import json
 import os
 from pathlib import Path
 
-from config import SYSTEM_PROMPT, MODEL_NAME, GROQ_API_KEY, LANGCHAIN_API_KEY, LANGCHAIN_TRACING_V2, LANGCHAIN_ENDPOINT, LANGCHAIN_PROJECT
-from tools import ContractData, fill_contract
-from s3_utils import S3Utils
-
-# Get absolute path to template
-template_path = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), 
-    "templates",
-    "VAResidentialSalesContractP1.pdf"
+from config import (
+    SYSTEM_PROMPT, MODEL_NAME, GROQ_API_KEY, 
+    LANGCHAIN_API_KEY, LANGCHAIN_TRACING_V2, 
+    LANGCHAIN_ENDPOINT, LANGCHAIN_PROJECT,
+    CONTRACT_TEMPLATE_PATH, OUTPUT_DIR
 )
+from tools import ContractData, fill_contract
 
 # Define contract generation tool 
-@tool(args_schema=ContractData)
-def generate_contract(user_id: str = None, **contract_data: Dict) -> str:
+@tool
+def generate_contract(
+    street_address: str,
+    buyer_name: str,
+    sales_price: str,
+    down_payment_amount: str,
+    first_trust_amount: Optional[str] = None,
+    financing_type: Optional[str] = None,  # FHA, VA, Conventional, or USDA
+    second_trust_amount: Optional[str] = None,
+    seller_held_amount: Optional[str] = None,
+    seller_subsidy_amount: Optional[str] = None,
+    financing_contingent: Optional[bool] = None,
+    **kwargs: Dict[str, Any]
+) -> str:
     """Generate a residential sales contract PDF using provided data.
     
-    This tool creates a residential sales contract based on the provided information.
-    All monetary values should be provided as plain numbers without commas or symbols.
-    
-    Args:
-        contract_data: Dictionary containing contract information including:
-            - Property details (address tax ID legal description)
-            - Financial details (price financing down payment)
-            - Party information (buyer seller brokers)
-            - Contingencies and terms
-    
-    Returns:
-        str: Success message or detailed error message if generation fails
+    Required Args:
+        street_address: Property address
+        buyer_name: Name of the buyer
+        sales_price: Sales price as string number (e.g. "500000")
+        down_payment_amount: Down payment as string number (e.g. "100000")
         
-    Example:
-        >>> generate_contract({
-        ...     "sales_price": "450000",  # NOT "$450,000"
-        ...     "down_payment_amount": "90000",
-        ...     "buyer_name": "John Smith"
-        ... })
+    Optional Args:
+        first_trust_amount: First trust loan amount if financing
+        financing_type: Type of financing (FHA, VA, Conventional, or USDA)
+        second_trust_amount: Second trust loan amount if applicable
+        seller_held_amount: Seller held trust amount if applicable
+        seller_subsidy_amount: Seller subsidy amount if applicable
+        financing_contingent: If financing is contingent
+        **kwargs: Additional contract fields (seller_name, tax_id, etc.)
     """
     try:
-        contract = ContractData.model_validate(contract_data)
-        formatted_data = {
-            "Sales Price": contract.sales_price,
-            "Down Payment $": contract.down_payment_amount,
-            "Buyer Name": contract.buyer_name,
-            "Street Address": contract.street_address,
-            "Conventional Financing": contract.conventional_financing,
-            "Financing IS Contingent": contract.financing_contingent
+        # Create base contract data
+        contract_data = {
+            "street_address": street_address,
+            "buyer_name": buyer_name,
+            "sales_price": sales_price,
+            "down_payment_amount": down_payment_amount,
+            "first_trust_amount": first_trust_amount,
+            "second_trust_amount": second_trust_amount,
+            "seller_held_amount": seller_held_amount,
+            "seller_subsidy_amount": seller_subsidy_amount,
+            "financing_contingent": financing_contingent
         }
-
-
-        # Verify template exists
-        if not os.path.exists(template_path):
-            raise FileNotFoundError(f"Contract template not found at: {template_path}")
-            
-        pdf_content = fill_contract(
-            contract, 
-            template_path
-        )
         
-        # Upload to S3
-        s3 = S3Utils()
-        file_name = f"contract_{uuid.uuid4().hex[:8]}.pdf"
-        s3_url = s3.upload_file(pdf_content, file_name, user_id)
+        # Set financing type based on financing_type parameter
+        if financing_type:
+            financing_type = financing_type.lower()
+            if financing_type == "fha":
+                contract_data["fha_financing"] = True
+            elif financing_type == "va":
+                contract_data["va_financing"] = True
+            elif financing_type == "conventional":
+                contract_data["conventional_financing"] = True
+            elif financing_type == "usda":
+                contract_data["usda_financing"] = True
+            else:
+                contract_data["other_financing"] = True
+                contract_data["other_financing_type"] = financing_type
+        
+        # Add any additional fields provided
+        contract_data.update(kwargs)
+
+        # Create and validate contract
+        contract = ContractData.model_validate(contract_data)
+        
+        # Verify template exists
+        if not os.path.exists(CONTRACT_TEMPLATE_PATH):
+            raise FileNotFoundError(f"Contract template not found at: {CONTRACT_TEMPLATE_PATH}")
             
-        return json.dumps({
-            "message": "Contract generated successfully",
-            "url": s3_url
-        })
+        pdf_content = fill_contract(contract, CONTRACT_TEMPLATE_PATH)
+        
+        # Save to file
+        output_path = os.path.join(OUTPUT_DIR, f"contract_{uuid.uuid4().hex[:8]}.pdf")
+        with open(output_path, "wb") as f:
+            f.write(pdf_content)
+            
+        return f"Contract generated successfully and saved to: {output_path}"
         
     except Exception as e:
         return f"Error generating contract: {str(e)}"

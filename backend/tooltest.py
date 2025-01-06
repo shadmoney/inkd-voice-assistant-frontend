@@ -5,13 +5,8 @@ from pydantic import ValidationError
 from tools import ContractData, fill_contract, MLSService
 from main import generate_contract
 from mls_mock_data import MLS_MOCK_DATA
-from s3_utils import S3Utils
 import json
 import os
-import sys
-from urllib.parse import urlparse
-import requests
-import uuid
 
 def test_contract_data_basic_validation():
     """Test basic contract data validation with field aliases"""
@@ -227,115 +222,28 @@ def test_fill_and_save_contract():
 
 def test_generate_contract():
     """Test contract generation through the assistant's generate_contract function"""
-    # Initialize S3 utils
-    s3_utils = S3Utils()
-    
-    # Test data matching the format expected by generate_contract
+    # Test data matching the new format expected by generate_contract
     contract_data = {
+        "street_address": "123 Main Street",
+        "buyer_name": "John Doe",
         "sales_price": "500000",
         "down_payment_amount": "100000",
-        "buyer_name": "John Doe",
-        "street_address": "123 Main Street",
-        "conventional_financing": True,
+        "financing_type": "Conventional",
+        "first_trust_amount": "400000",
         "financing_contingent": True
     }
     
-    # Save contract locally first
-    local_path = os.path.join("test_output", f"contract_test_{uuid.uuid4().hex[:8]}.pdf")
-    os.makedirs("test_output", exist_ok=True)
-    
-    # Generate contract using fill_contract directly
-    contract = ContractData.model_validate(contract_data)
-    template_path = "templates/VAResidentialSalesContractP1.pdf"
-    filled_pdf = fill_contract(contract, template_path)
-    
-    # Save locally
-    with open(local_path, "wb") as f:
-        f.write(filled_pdf)
-    
-    # Verify local file
-    assert os.path.exists(local_path)
-    assert os.path.getsize(local_path) > 0
-    
-    # Now upload to S3 using generate_contract
     result = generate_contract.invoke(contract_data)
-    
-    # Verify success message
+
+    # Verify success message and file creation
     assert "Contract generated successfully" in result
     
-    # Extract the S3 URL from the success message
-    s3_url = result.split(": ")[1]
+    # Extract the output path from the success message
+    output_path = result.split(": ")[1]
     
-    # Parse the S3 URL to get the key
-    parsed_url = urlparse(s3_url)
-    key = parsed_url.path.lstrip('/')
+    # Verify the file was created and has content
+    assert os.path.exists(output_path)
+    assert os.path.getsize(output_path) > 0
     
-    try:
-        # Generate a presigned URL to download the file
-        presigned_url = s3_utils.generate_presigned_url(key)
-        assert presigned_url is not None, "Failed to generate presigned URL for S3 file"
-        
-        # Download the file using the presigned URL
-        response = requests.get(presigned_url)
-        assert response.status_code == 200, "Failed to download file from S3"
-        
-        # Save the PDF temporarily to verify its contents
-        temp_pdf_path = "test_output/temp_test.pdf"
-        os.makedirs(os.path.dirname(temp_pdf_path), exist_ok=True)
-        with open(temp_pdf_path, "wb") as f:
-            f.write(response.content)
-            
-        # Verify the file exists and has content
-        assert os.path.exists(temp_pdf_path)
-        assert os.path.getsize(temp_pdf_path) > 0
-        
-        # Clean up the temporary files
-        os.remove(temp_pdf_path)
-        os.remove(local_path)
-        
-    except Exception as e:
-        pytest.fail(f"Failed to verify contract in S3: {str(e)}")
-
-if __name__ == "__main__":
-    # Read contract data from stdin
-    try:
-        contract_data = json.load(sys.stdin)
-        print("Received contract data:", contract_data)
-        
-        # Extract user_id from the input data
-        user_id = contract_data.pop("user_id", None)
-        print("User ID:", user_id)
-        
-        # Convert the data to the format expected by ContractData
-        formatted_data = {
-            "Sales Price": contract_data["sales_price"],
-            "Down Payment $": contract_data["down_payment_amount"],
-            "Buyer Name": contract_data["buyer_name"],
-            "Street Address": contract_data["street_address"],
-            "Conventional Financing": contract_data["conventional_financing"],
-            "Financing IS Contingent": contract_data["financing_contingent"]
-        }
-        
-        # Generate contract
-        contract = ContractData.model_validate(formatted_data)
-        template_path = "templates/VAResidentialSalesContractP1.pdf"
-        filled_pdf = fill_contract(contract, template_path)
-        
-        # Save locally first
-        timestamp = date.today().strftime("%Y-%m-%d-%H%M%S")
-        local_path = os.path.join("output", f"contract_{timestamp}.pdf")
-        os.makedirs("output", exist_ok=True)
-        
-        with open(local_path, "wb") as f:
-            f.write(filled_pdf)
-            
-        # Upload to S3 with user_id for folder organization
-        s3 = S3Utils()
-        s3_url = s3.upload_file(filled_pdf, f"contract_{timestamp}.pdf", user_id)
-        
-        print("Contract generated successfully")
-        sys.exit(0)
-        
-    except Exception as e:
-        print(f"Error generating contract: {str(e)}", file=sys.stderr)
-        sys.exit(1)
+    # Clean up the test file
+    os.remove(output_path)
