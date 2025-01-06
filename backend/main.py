@@ -106,15 +106,17 @@ def generate_contract(
             
         # Upload to S3 in output directory
         s3 = S3Utils()
-        s3_key = f"output/{filename}"
-        s3.s3_client.put_object(
-            Bucket=s3.bucket_name,
-            Key=s3_key,
-            Body=pdf_content,
-            ContentType='application/pdf'
+        s3_url = s3.upload_file(
+            file_content=pdf_content,
+            file_name=f"output/{filename}"
         )
+        print(f"Uploaded contract to S3: {s3_url}")
             
-        return f"Contract generated successfully and saved to: {output_path}"
+        return {
+            "message": "Contract generated successfully",
+            "local_path": output_path,
+            "url": s3_url
+        }
         
     except Exception as e:
         return f"Error generating contract: {str(e)}"

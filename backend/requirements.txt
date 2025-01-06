@@ -13,4 +13,7 @@ PyPDFForm
 python-dotenv
 livekit-plugins-deepgram
 livekit-plugins-openai 
+boto3
+fastapi-cors
+fastapi
 
