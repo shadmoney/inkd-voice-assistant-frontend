@@ -84,6 +84,7 @@ def configure_bucket_policy():
                 'AllowedOrigins': [
                     'http://localhost:3000',
                     'https://localhost:3000',
+                    'https://*.gitpod.io',  # Allow Gitpod workspace URLs
                     os.environ.get("FRONTEND_URL", "http://localhost:3000")
                 ],
                 'ExposeHeaders': [
