@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+boto3
+python-dotenv
+langchain-core
+langchain-groq
+langgraph
+streamlit
+PyPDF2
+openai>=1.0.0
+livekit>=0.12.0
+PyPDFForm
+
+
