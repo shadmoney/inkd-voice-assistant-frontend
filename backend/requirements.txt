@@ -13,6 +13,7 @@ PyPDFForm
 python-dotenv
 livekit-plugins-deepgram
 livekit-plugins-openai 
+livekit-plugins-silero
 boto3
 fastapi-cors
 fastapi

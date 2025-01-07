@@ -101,8 +101,10 @@ def generate_contract(
         output_path = os.path.join(OUTPUT_DIR, filename)
         
         # Save locally
+        print(f"Saving contract to local path: {output_path}")
         with open(output_path, "wb") as f:
             f.write(pdf_content)
+        print(f"Successfully saved contract to: {output_path}")
             
         # Upload to S3 in output directory
         s3 = S3Utils()

@@ -132,6 +132,7 @@ export default function GenerateContract() {
   const [isContractGenerating, setIsContractGenerating] = useState(false);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
   const { user, authenticated } = usePrivy();
+  const [lastCheckTime, setLastCheckTime] = useState<number>(Date.now());
 
   // Start polling when contract generation begins
   useEffect(() => {
@@ -287,6 +288,64 @@ export default function GenerateContract() {
     }
   }, [authenticated, login]);
 
+  // Function to check for new contracts
+  const checkForNewContract = useCallback(async () => {
+    try {
+      // Add timestamp to prevent caching
+      const response = await fetch(`/api/latest-contract?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Latest contract data:', data);
+        
+        if (data.url && data.url !== pdfUrl) {
+          console.log('New contract detected, updating URL from', pdfUrl, 'to', data.url);
+          // Add timestamp to PDF URL to force refresh
+          setPdfUrl(`${data.url}?t=${Date.now()}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for new contract:', error);
+    }
+  }, [pdfUrl]);
+
+  // Poll more frequently (every second) when connected
+  useEffect(() => {
+    if (agentState === 'connected') {
+      const interval = setInterval(checkForNewContract, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [agentState, checkForNewContract]);
+
+  // Initial contract load
+  const fetchInitialContract = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/latest-contract');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.url) {
+          setPdfUrl(data.url);
+        } else {
+          // Fallback to empty contract
+          await fetchEmptyContract();
+        }
+      } else {
+        await fetchEmptyContract();
+      }
+    } catch (error) {
+      console.error('Error fetching initial contract:', error);
+      await fetchEmptyContract();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialContract();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -359,9 +418,9 @@ export default function GenerateContract() {
                   data={pdfUrl}
                   type="application/pdf"
                   className="w-full h-full"
+                  key={pdfUrl}
                   onError={(e) => {
                     console.error('Error loading PDF:', e);
-                    // If not already using local file, try it as fallback
                     if (pdfUrl !== '/empty-contract.pdf') {
                       console.log('Falling back to local PDF file');
                       setPdfUrl('/empty-contract.pdf');
